@@ -1,42 +1,62 @@
 ﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="AspGmapDirectionApp._Default" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <script src="//maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=abqiaaaaupsjpk3mbtdpj4g8cqbnjrragtyh6uml8madna0ykuwnna8vnxqczvbxtx2dyyxgstoxpwhvig7djw" type="text/javascript">
+    </script>
+    <script language="javascript">
+        var Gmap;
+        var directionPanel;
+        var direction;
+        function initialize() {
+            Gmap = new GMap2(document.getElementById("map"));
+            Gmap.setCenter(new GLatLng(33.8749588, -117.9659036), 15);
 
-    <div class="jumbotron">
-        <h1>ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS, and JavaScript.</p>
-        <p><a href="http://www.asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-    </div>
+            directionPanel = document.getElementById("route");
+            direction = new GDirections(Gmap, directionPanel);
+        }
+        $(document).ready(function () {
+            initialize();
+            $('#btnGetDirection').click(function () {
+                pupulateDirection();
+            });
+        });
 
-    <div class="row">
-        <div class="col-md-4">
-            <h2>Getting started</h2>
-            <p>
-                ASP.NET Web Forms lets you build dynamic websites using a familiar drag-and-drop, event-driven model.
-            A design surface and hundreds of controls and components let you rapidly build sophisticated, powerful UI-driven sites with data access.
-            </p>
-            <p>
-                <a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301948">Learn more &raquo;</a>
-            </p>
-        </div>
-        <div class="col-md-4">
-            <h2>Get more libraries</h2>
-            <p>
-                NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.
-            </p>
-            <p>
-                <a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301949">Learn more &raquo;</a>
-            </p>
-        </div>
-        <div class="col-md-4">
-            <h2>Web Hosting</h2>
-            <p>
-                You can easily find a web hosting company that offers the right mix of features and price for your applications.
-            </p>
-            <p>
-                <a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301950">Learn more &raquo;</a>
-            </p>
-        </div>
-    </div>
-
+        function populateDirection() {
+            var from = $('#<%=direcFrom.ClientID%>').val();
+            var to = $('#<%=direcTo.ClientID%>').val();
+            $.ajax({
+                url: "Default.aspx/GetDirection",
+                type: "post",
+                data: "{from: '" + from + "', to: '" + to + "'}",
+                datatype: "json",
+                contenttype: "application/json; charset=utf-8",
+                success: function (data) {
+                    direction.load(data.d.toString());
+                },
+                error: function () {
+                    alert("error!");
+                }
+            });
+        }
+    </script>                                                                                                                                                                                                          
+    <h3>Get GMap direction from database using ASP.NET</h3>
+    <br />
+    <table>
+        <tr>
+            <td>From : </td>
+            <td>
+                <asp:DropDownList ID="direcFrom" runat="server"></asp:DropDownList>
+            </td>
+            <td>To : </td>
+            <td>
+                <asp:DropDownList ID="direcTo" runat="server"></asp:DropDownList>
+            </td>
+            <td>
+                <input type="button" value="Get Direction" id="btnGetDirection" />
+            </td>
+        </tr>
+    </table>
+    <br />
+    <div id="map" style="width:50%; height:300px; border:solid 1px black; float:left"></div>
+    <div id="route" style="width:30%; height:300px; border:solid 1px black; float:left; overflow:auto"></div> 
 </asp:Content>
